@@ -3,10 +3,10 @@
 from django.http import StreamingHttpResponse, HttpResponse
 
 
-def stream_response_generator():
+def stream_response_generator(ip):
     from shelljob import proc
     g = proc.Group()
-    p = g.run(["bash", "-c", "nmap baidu.com -sV -vvv"])
+    p = g.run(["bash", "-c", "nmap %s -sV -vvvv"%ip])
 
     while g.is_pending():
         lines = g.readlines()
@@ -15,7 +15,10 @@ def stream_response_generator():
 
 
 def stream_response(request):
-    return StreamingHttpResponse(stream_response_generator())
+    ip = request.GET.get('ip', '')
+    if not ip:
+        return "no ip."
+    return StreamingHttpResponse(stream_response_generator(ip))
 
 
 def index(request):
@@ -25,7 +28,7 @@ def index(request):
     background: lightblue;
     }
     </style></head>
-<p>Hello
+    <p>Hello
 
 <script>
 var xhr = new XMLHttpRequest();
